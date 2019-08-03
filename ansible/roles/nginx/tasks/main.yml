@@ -1,0 +1,25 @@
+---
+- name: Install nginx
+  become: true
+  apt:
+    name: nginx
+    state: present
+  notify:
+    - Start nginx
+
+- name: Insert standard shopware nginx config
+  become: true
+  template:
+    src: templates/shopware-nginx.conf.j2
+    dest: "{{nginx_available_root}}{{shopware_app_host_name}}.conf"
+  notify:
+    - Reload nginx
+
+- name: Symlink nginx-conf conf to enabled folder
+  become: true
+  file:
+    src: "{{nginx_available_root}}{{shopware_app_host_name}}.conf"
+    path: "{{nginx_enabled_root}}{{shopware_app_host_name}}.conf"
+    state: link
+  notify:
+    - Reload nginx

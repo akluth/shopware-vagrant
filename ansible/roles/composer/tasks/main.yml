@@ -1,0 +1,26 @@
+- name: Check for Composer
+  stat:
+    path: /usr/local/bin/composer
+  register: composer_stat
+
+- name: Download Composer
+  script: scripts/install_composer.sh
+  when: not composer_stat.stat.exists
+
+- name: Move Composer globally
+  become: true
+  command: mv composer.phar /usr/local/bin/composer
+  when: not composer_stat.stat.exists
+
+- name: Set permissions on Composer
+  become: true
+  file:
+    path: /usr/local/bin/composer
+    mode: "a+x"
+
+- name: Make sure Composer is at its latest version
+  composer:
+    working_dir: "/home/{{ ansible_user }}"
+    command: self-update
+  register: composer_self_update
+  changed_when: "not composer_self_update.stdout is search('You are already using composer version')"

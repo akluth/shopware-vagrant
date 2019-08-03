@@ -1,0 +1,4 @@
+---
+nginx_available_root: /etc/nginx/sites-available/
+nginx_enabled_root: /etc/nginx/sites-enabled/
+nginx_log_root: /var/log/nginx/

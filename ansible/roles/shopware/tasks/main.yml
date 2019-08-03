@@ -1,0 +1,69 @@
+---
+- name: Download shopware source code
+  become: true
+  git:
+    repo: "https://github.com/shopware/shopware.git"
+    dest: "{{nginx_web_root}}{{shopware_app_host_name}}"
+    version: "{{shopware_version_tag}}"
+
+- name: Create config.php
+  become: true
+  template:
+    src: templates/config.php.j2
+    dest: "{{nginx_web_root}}{{shopware_app_host_name}}/config.php"
+
+- name: Copy plugins to custom/plugins
+  become: true
+  copy:
+    src: "{{playbook_dir}}/../plugins/"
+    dest: "{{nginx_web_root}}{{shopware_app_host_name}}/custom/plugins/"
+
+- name: Copy legacy plugins to engine/Shopware/Plugins
+  become: true
+  copy:
+    src: "{{playbook_dir}}/../legacy_plugins/"
+    dest: "{{nginx_web_root}}{{shopware_app_host_name}}/engine/Shopware/Plugins/"
+
+- name: Copy themes to themes
+  become: true
+  copy:
+    src: "{{playbook_dir}}/../legacy_plugins/"
+    dest: "{{nginx_web_root}}{{shopware_app_host_name}}/themes/"
+
+- name: Execute composer install
+  become: true
+  composer:
+    command: install
+    no_dev: false
+    working_dir: "{{nginx_web_root}}{{shopware_app_host_name}}"
+
+- name: Set shopware privileges
+  become: true
+  file:
+    path:
+      - "{{nginx_web_root}}{{shopware_app_host_name}}/custom/plugins"
+      - "{{nginx_web_root}}{{shopware_app_host_name}}/engine/Shopware/Plugins/Community"
+      - "{{nginx_web_root}}{{shopware_app_host_name}}/files"
+      - "{{nginx_web_root}}{{shopware_app_host_name}}/media"
+      - "{{nginx_web_root}}{{shopware_app_host_name}}/var"
+      - "{{nginx_web_root}}{{shopware_app_host_name}}/web"
+    mode: "0755"
+    recurse: true
+
+- name: Set shopware ownership to www-data
+  become: true
+  file:
+    path: "{{nginx_web_root}}{{shopware_app_host_name}}"
+    recurse: true
+    owner: www-data
+    group: www-data
+
+- name: Pretend to have run the installer
+  become_user: www-data
+  file:
+    path: "{{nginx_web_root}}{{shopware_app_host_name}}/recovery/install/data/install.lock"
+    state: lock
+
+#- name: Execute ant build
+#  become_user: www-data
+#  command: ant -f "{{nginx_web_root}}{{shopware_app_host_name}}/build/build.xml build-unit"

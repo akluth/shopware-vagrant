@@ -1,0 +1,13 @@
+---
+- name: apply provisioning
+  hosts: all
+  roles:
+    - common
+    - php
+    - nginx
+    - mysql
+    - composer
+    - shopware
+
+  vars:
+    nginx_web_root: /var/www/

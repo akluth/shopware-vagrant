@@ -1,0 +1,36 @@
+---
+- name: install module requirements
+  become: true
+  apt:
+    name:
+      - aptitude
+    state: present
+
+- name: update apt cache
+  become: true
+  apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: upgrade distro
+  become: true
+  apt:
+    upgrade: safe
+
+- name: install common tools
+  become: true
+  apt:
+    name:
+      - sudo
+      - bash-completion
+      - python-pycurl
+      - git
+      - htop
+      - tree
+      - vim
+      - curl
+      - zip
+      - rsync
+      - wget
+      - ant
+    state: latest

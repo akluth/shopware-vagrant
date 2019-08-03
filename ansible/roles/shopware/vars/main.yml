@@ -1,0 +1,2 @@
+---
+shopware_version_tag: "v{{shopware_version|default(5.5.10)}}"
